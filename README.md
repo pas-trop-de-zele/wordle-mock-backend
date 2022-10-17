@@ -8,8 +8,12 @@ $ foreman start
 
 ## Login using httpie
 
-Passing username:password in Authorization header
-
 ```
 http POST <insert local url here>/login --auth <username>:<password>
+```
+
+## Register using httpie
+
+```
+http POST <insert local url here>/register username=<new username> password=<new password>
 ```
