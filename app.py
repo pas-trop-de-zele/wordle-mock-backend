@@ -1,7 +1,12 @@
 from typing import Tuple
-from quart import g, Quart, jsonify, request
+from uuid import UUID
+from quart import g, Quart, jsonify, request, abort
 import sqlite3
 import base64
+import json
+import random
+import databases
+# from './correct.json' import correctWord
 
 # ----------------------------Setting up----------------------------
 app = Quart(__name__)  
@@ -24,6 +29,11 @@ def get_db():
     if not hasattr(g, "sqlite_db"):
         g.sqlite_db = _connect_db()
     return g.sqlite_db
+    # db = getattr(g, "_sqlite_db", None)
+    # if db is None:
+    #     db = g._sqlite_db = databases.Database(app.config["DATABASES"]["URL"])
+    #     await db.connect()
+    # return db
 
 init_db()
 
@@ -83,3 +93,72 @@ def getUsernamePasswordFromHeader(req) -> Tuple[str, str]:
     hashBytes = req.headers["Authorization"].split()[1]
     username, passsword = base64.b64decode(hashBytes).decode("utf-8").split(":")
     return username, passsword
+
+
+@app.route("/startgame", methods=["GET", "POST"])
+async def startGame ():
+    if request.method == "GET":
+        return "Pass in username to start the game"
+    else:
+        data = await request.get_json()
+        if not data or 'username' not in data:
+            return "Required username", 400
+        
+        if not isUserExisted(data['username']):
+            return "Username not Found, Please register " + data['username'], 404
+
+        # await startNewGame(data["username"])
+        # return "Game Started, Start Guessing"
+        db =  get_db()
+        cur = db.execute(
+            "SELECT username FROM games WHERE username = ?", (data["username"],)
+        )
+        user = cur.fetchall()
+        print("user",data)
+        if user:
+            return "Game Exists"
+        f = open('correct.json')
+        jsonData = json.load(f)
+        try:
+            db.execute(
+            "INSERT INTO games(username, secretkey,numberOfGuesses) VALUES(?, ?, ?)", (data["username"], random.choice(jsonData),0,)
+            )
+            db.commit()
+        except sqlite3.IntegrityError as e:
+            abort(409, e)
+
+        return "game started with id: "
+
+@app.route("/listAllGames/<string:username>", methods=["GET"])
+def listAllGame (username):
+    db =  get_db()
+    game =  db.execute(
+            "SELECT gameId,numberOfGuesses, username FROM games WHERE username = ?", (username,)
+        )
+
+    game = game.fetchall()
+    print("game",game)
+    if game:
+        # it = iter(game)
+        # res_dct = dict(zip(it, it))
+        # return res_dct
+        return list(map(dict, game))
+    else:
+        abort(404)
+
+@app.route("/retrievegame/<int:gameid>", methods=["GET"])
+def retrieveGame (gameid):
+    db =  get_db()
+    game =  db.execute(
+            "SELECT gameId,numberOfGuesses, username FROM games WHERE gameid = ?", (gameid,)
+        )
+
+    game = game.fetchall()
+    print("game",game)
+    if game:
+        # it = iter(game)
+        # res_dct = dict(zip(it, it))
+        # return res_dct
+        return list(map(dict, game))
+    else:
+        abort(404)
