@@ -13,7 +13,7 @@ app.config.update({
 })
 
 def _connect_db():
-    engine = sqlite3.connect(app.config["DATABASE"])
+    engine = sqlite3.connect(app.config["DATABASE"]) 
     engine.row_factory = sqlite3.Row
     return engine
 
