@@ -5,8 +5,6 @@ import sqlite3
 import base64
 import json
 import random
-import databases
-# from './correct.json' import correctWord
 
 # ----------------------------Setting up----------------------------
 app = Quart(__name__)  
@@ -29,11 +27,6 @@ def get_db():
     if not hasattr(g, "sqlite_db"):
         g.sqlite_db = _connect_db()
     return g.sqlite_db
-    # db = getattr(g, "_sqlite_db", None)
-    # if db is None:
-    #     db = g._sqlite_db = databases.Database('sqlite+aiosqlite:/schema.db')
-    #     await db.connect()
-    # return db
 
 init_db()
 
