@@ -31,7 +31,7 @@ def get_db():
     return g.sqlite_db
     # db = getattr(g, "_sqlite_db", None)
     # if db is None:
-    #     db = g._sqlite_db = databases.Database(app.config["DATABASES"]["URL"])
+    #     db = g._sqlite_db = databases.Database('sqlite+aiosqlite:/schema.db')
     #     await db.connect()
     # return db
 
@@ -65,22 +65,22 @@ async def register():
         data = await request.get_json()
         if not data or 'username' not in data or 'password' not in data:
             return "Required username and password", 400
-        
-        if isUserExisted(data['username']):
+        isUser = await isUserExisted(data['username'])
+        if isUser :
             return "Username not availabe", 400
 
-        insertUser(data["username"], data["password"])
+        await insertUser(data["username"], data["password"])
         return "User registered"
 
-def isUserExisted(username) -> bool:
-    db = get_db()
+async def isUserExisted(username) -> bool:
+    db =  get_db()
     cur = db.execute(
         "SELECT username FROM user WHERE username = ?", (username,)
     )
     user = cur.fetchall()
-    return True if user else False
+    return True if user and len(user) > 0 else False
 
-def insertUser(username, password) -> None:
+async def insertUser(username, password) -> None:
     db = get_db()
     db.execute(
         "INSERT INTO user(username, pwd) VALUES(?, ?)", (username, password,)
@@ -103,33 +103,28 @@ async def startGame ():
         data = await request.get_json()
         if not data or 'username' not in data:
             return "Required username", 400
-        
-        if not isUserExisted(data['username']):
+        isUser = await isUserExisted(data['username'])
+        if not isUser:
             return "Username not Found, Please register " + data['username'], 404
-
-        # await startNewGame(data["username"])
-        # return "Game Started, Start Guessing"
         db =  get_db()
         cur = db.execute(
             "SELECT username FROM games WHERE username = ?", (data["username"],)
         )
         user = cur.fetchall()
-        print("user",data)
         if user:
             return "Game Exists"
         f = open('correct.json')
         jsonData = json.load(f)
         try:
-            db.execute(
+            id =  db.execute(
             "INSERT INTO games(username, secretkey,numberOfGuesses) VALUES(?, ?, ?)", (data["username"], random.choice(jsonData),0,)
             )
             db.commit()
         except sqlite3.IntegrityError as e:
             abort(409, e)
+        return f'game started with id: {id.lastrowid}' 
 
-        return "game started with id: "
-
-@app.route("/listAllGames/<string:username>", methods=["GET"])
+@app.route("/listallgames/<string:username>", methods=["GET"])
 def listAllGame (username):
     db =  get_db()
     game =  db.execute(
@@ -139,9 +134,6 @@ def listAllGame (username):
     game = game.fetchall()
     print("game",game)
     if game:
-        # it = iter(game)
-        # res_dct = dict(zip(it, it))
-        # return res_dct
         return list(map(dict, game))
     else:
         abort(404)
@@ -156,9 +148,6 @@ def retrieveGame (gameid):
     game = game.fetchall()
     print("game",game)
     if game:
-        # it = iter(game)
-        # res_dct = dict(zip(it, it))
-        # return res_dct
         return list(map(dict, game))
     else:
         abort(404)
