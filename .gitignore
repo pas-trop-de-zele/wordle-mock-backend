@@ -1,3 +1,4 @@
 **/__pycache__
 schema
 *.db
+.DS_Store
