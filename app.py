@@ -33,12 +33,12 @@ init_db()
 # ----------------------------Routes----------------------------
 @app.route("/", methods=["GET"])
 async def home():
-    return "Welcome to wordle!"
+    return jsonifyMessage("Welcome to wordle!")
 
 @app.route("/login", methods=["GET", "POST"])
 async def login():
     if request.method == "GET":
-        return "Send based64(username:password) in Authorization header"
+        return jsonifyMessage("Send based64(username:password) in Authorization header")
     else:
         username, password = getUsernamePasswordFromHeader(request)
         db = get_db()
@@ -47,23 +47,23 @@ async def login():
         )
         user = cur.fetchall()
         if not user:
-            return "Invalid username or password", 401, {"WWW-Authenticate": "Basic"}
+            return jsonifyMessage("Invalid/ Missing username or password. Send based64(username:password) in Authorization header"), 401, {"WWW-Authenticate": "Basic"}
         return {"authenticated": True}, 200
 
 @app.route("/register", methods=["GET", "POST"])
 async def register():
     if request.method == "GET":
-        return "Pass in username and password in POST request"
+        return jsonifyMessage("Pass in username and password in POST request")
     else:
         data = await request.get_json()
         if not data or 'username' not in data or 'password' not in data:
-            return "Required username and password", 400
+            return jsonifyMessage("Required username and password"), 400
         isUser = await isUserExisted(data['username'])
         if isUser :
-            return "Username not availabe", 400
+            return jsonifyMessage("Username not availabe"), 400
 
         await insertUser(data["username"], data["password"])
-        return "User registered"
+        return jsonifyMessage("User registered")
 
 async def isUserExisted(username) -> bool:
     db =  get_db()
@@ -87,6 +87,8 @@ def getUsernamePasswordFromHeader(req) -> Tuple[str, str]:
     username, passsword = base64.b64decode(hashBytes).decode("utf-8").split(":")
     return username, passsword
 
+def jsonifyMessage(message):
+    return {"message": message}
 
 @app.route("/startgame", methods=["GET", "POST"])
 async def startGame ():
