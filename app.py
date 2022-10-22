@@ -103,7 +103,7 @@ async def start_game():
     user = await db.fetch_one(query=query, values={"username": data['username']})
     userid = 0
     if not user:
-        return jsonify_message("Username not Found, Please register " + data['username']), 404
+        return jsonify_message(f"Username not Found, Please register {data['username']}"), 404
     else:
         userid = user["userid"]
 
@@ -116,7 +116,7 @@ async def start_game():
         last_insert_id = await db.execute(query=query, values=values)
     except sqlite3.IntegrityError as e:
         abort(409, e)
-    return jsonify_message(f"game started with id: {last_insert_id}")
+    return jsonify_message(f"Game started with id: {last_insert_id}.")
 
 
 @app.route("/wordle/<string:username>/games", methods=["GET"])
