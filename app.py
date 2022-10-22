@@ -91,35 +91,32 @@ def get_username_password_from_header(req) -> Tuple[str, str]:
     return username, passsword
 
 
-@app.route("/wordle/start", methods=["GET", "POST"])
+@app.route("/wordle/start", methods=["POST"])
 async def start_game():
-    if request.method == "GET":
-        return jsonify_message("Pass in username to start the game")
+    data = await request.get_json()
+
+    if not data or 'username' not in data:
+        return jsonify_message("Required username"), 400
+
+    db =  await _get_db()
+    query = "SELECT userid FROM user WHERE username = :username"
+    user = await db.fetch_one(query=query, values={"username": data['username']})
+    userid = 0
+    if not user:
+        return jsonify_message("Username not Found, Please register " + data['username']), 404
     else:
-        data = await request.get_json()
+        userid = user["userid"]
 
-        if not data or 'username' not in data:
-            return jsonify_message("Required username"), 400
+    query = "SELECT * FROM secret_word ORDER BY RANDOM() LIMIT 1"
+    secret_word = await db.fetch_one(query=query)
 
-        db =  await _get_db()
-        query = "SELECT userid FROM user WHERE username = :username"
-        user = await db.fetch_one(query=query, values={"username": data['username']})
-        userid = 0
-        if not user:
-            return jsonify_message("Username not Found, Please register " + data['username']), 404
-        else:
-            userid = user["userid"]
-
-        query = "SELECT * FROM secret_word ORDER BY RANDOM() LIMIT 1"
-        secret_word = await db.fetch_one(query=query)
-
-        try:
-            query = "INSERT INTO games(userid, secretWord) VALUES(:userid, :secret_word)"
-            values = {"userid": userid, "secret_word": secret_word.word}
-            last_insert_id = await db.execute(query=query, values=values)
-        except sqlite3.IntegrityError as e:
-            abort(409, e)
-        return jsonify_message(f"game started with id: {last_insert_id}")
+    try:
+        query = "INSERT INTO games(userid, secretWord) VALUES(:userid, :secret_word)"
+        values = {"userid": userid, "secret_word": secret_word.word}
+        last_insert_id = await db.execute(query=query, values=values)
+    except sqlite3.IntegrityError as e:
+        abort(409, e)
+    return jsonify_message(f"game started with id: {last_insert_id}")
 
 
 @app.route("/wordle/<string:username>/games", methods=["GET"])
