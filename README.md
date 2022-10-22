@@ -2,8 +2,15 @@
 
 ## Setup
 ### Requirements
-Python 3 (+ pip), Quart, SQLite 3, Foreman, PyTest, HTTPie
+    - Python 3 (with pip)
+    - Quart
+    - SQLite 3
+    - Foreman
+    - Quart-Schema
+    - HTTPie
+    - PyTest
 
+Run the following commands if any of the required libraries are missing:
 ```
 $ sudo snap install httpie
 $ sudo apt update
@@ -14,6 +21,19 @@ $ python3 -m pip install databases[aiosqlite]
 $ python3 -m pip install quart-schema
 ```
 
+### Initializing the Database
+Before running the app, run the following command to initialize the database and populate the tables for the correct and valid words.
+```
+$ ./init.sh
+```
+
+### Launching the App
+Use the following command to start the app. Take note of the URI of the app in the output.
+```
+$ foreman start
+```
+
+
 
 ## Testing
 
@@ -22,11 +42,6 @@ pytest test_api.py
 ```
 
 ## Running the App
-
-#### How to launch app
-```
-$ foreman start
-```
 
 #### Login using httpie
 ```
@@ -53,56 +68,5 @@ http  <insert local url here>/listAllGames/<string:username>
 http  <insert local url here>/retrievegame/<int:gameid>
 ```
 
-## databases implementation
-
-
-The database is implemented via. the Databases library. The database has to be initiated in an async function using databases library.
-
-In the databasesSnippets.py are examples of how to execute SQL calls through the databases library.
-
-Tables are already initialized in the init function and it can be copied into the app.py to be used.
-
-To execute one single insert SQL query through the databases library: 
-
-
-```
-query = """INSERT INTO user (uID, userName, password, currentGameID) 
-                                VALUES (:uID, :userName, :password, :currentGameID)"""
-values = {"uID": 123, 
-            "userName": "jasmineTea", 
-            "password" : "attaDBS123", 
-            "currentGameID": 7}
-await database.execute(query=query, values=values)
-```
-
-To execute many insert SQL queries through the databases library:
-
-
-```
-query = """INSERT INTO guessesMade (gameID, guess) 
-                                VALUES (:gameID, :guess)"""
-values = [
-    {"gameID": "123", "guess": "flower"},
-    {"gameID": "123", "guess": "cupcake"}]
-await database.execute_many(query=query, values=values)
-```
-
-You can query SQL statements too:
-
-# Fetch multiple rows
-
-```
-query = "SELECT * FROM notes WHERE completed = :completed"
-rows = await database.fetch_all(query=query, values={"completed": True})
-```
-
-# Fetch single row
-
-```
-query = "SELECT * FROM notes WHERE id = :id"
-result = await database.fetch_one(query=query, values={"id": 1})
-```
-
-Summary source: https://www.encode.io/databases/database_queries/ 
 
 

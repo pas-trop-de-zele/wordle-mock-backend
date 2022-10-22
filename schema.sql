@@ -21,7 +21,7 @@ CREATE TABLE games(
 INSERT INTO user(username, pwd)
 VALUES ('testusername', 'testpassword');
 
-INSERT INTO games(username, secretkey,numberOfGuesses) VALUES('gamer1', 'flick', 0);
-INSERT INTO games(username, secretkey,numberOfGuesses) VALUES('gamer2', 'texte', 0);
+INSERT INTO games(username, secretkey, numberOfGuesses) VALUES('gamer1', 'flick', 0);
+INSERT INTO games(username, secretkey, numberOfGuesses) VALUES('gamer2', 'texte', 0);
 
 COMMIT;
