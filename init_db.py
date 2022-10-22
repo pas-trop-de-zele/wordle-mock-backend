@@ -89,11 +89,15 @@ async def populate_tables():
     data = json.load(valid_json)
     for word in data:
         values.append({"word": word})
+    data = json.load(correct_json)  # correct words are not in the valid words list, going to mix them in too.
+    for word in data:
+        values.append({"word": word})
     await database.execute_many(query=query, values=values)
 
 
+
 def main():
-    asyncio.run(init_db()) 
+    # asyncio.run(init_db()) 
     asyncio.run(populate_tables())
 
 if __name__ == "__main__":

@@ -2,15 +2,15 @@
 
 ## Setup
 ### Requirements
-    - Python 3 (with pip)
-    - Quart
-    - SQLite 3
-    - Databases
-    - SQLAlchemy (==v1.4.41) *see Known Issues section*
-    - Foreman
-    - Quart-Schema
-    - HTTPie
-    - PyTest
+- Python 3 (with pip)
+- Quart
+- SQLite 3
+- Databases
+- SQLAlchemy (==v1.4.41) *see Known Issues section*
+- Foreman
+- Quart-Schema
+- HTTPie
+- PyTest
 
 Run the following commands if any of the required libraries are missing:
 ```
