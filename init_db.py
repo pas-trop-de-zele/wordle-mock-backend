@@ -26,8 +26,7 @@ async def init_db():
             CREATE TABLE user (
                 userid INTEGER NOT NULL PRIMARY KEY ASC, 
                 username TEXT NOT NULL UNIQUE, 
-                pwd BLOB NOT NULL,
-                dateCreated TEXT
+                pwd BLOB NOT NULL
             )
             """
     await database.execute(query=query)
@@ -38,8 +37,7 @@ async def init_db():
                 userid INTEGER NOT NULL,
                 secretWord TEXT NOT NULL,
                 isActive INTEGER DEFAULT 0 NOT NULL,
-                hasWon INTEGER DEFAULT 0 NOT NULL,
-                dateCreated TEXT
+                hasWon INTEGER DEFAULT 0 NOT NULL
             )
             """
     await database.execute(query=query)
@@ -48,8 +46,7 @@ async def init_db():
             CREATE TABLE guesses (
                 guessid INTEGER NOT NULL PRIMARY KEY ASC,
                 gameid INTEGER NOT NULL,
-                guess TEXT NOT NULL,
-                dateCreated TEXT
+                guess TEXT NOT NULL
             )
             """
     await database.execute(query=query)
