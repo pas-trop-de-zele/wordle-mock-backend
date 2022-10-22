@@ -182,6 +182,7 @@ def calculate_game_status(guesses):
 
     return {
         "num_guesses": num_guesses,
+        "max_attempts": app.config["WORDLE"]["MAX_NUM_ATTEMPTS"],
         "guesses": list_guesses
     }
 
