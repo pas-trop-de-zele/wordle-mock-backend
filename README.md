@@ -48,9 +48,6 @@ Use the following command to start the app. Take note of the URI of the app in t
 $ foreman start
 ```
 
-## Running the App
-The HTTPie commands listed in this section run under the assumption that the default localhost URI `127.0.0.1` is used and that the port value of `3000` in `.env` has not been changed. 
-
 
 ### Database Structure
 The app database currently has five total tables.
@@ -73,6 +70,10 @@ The app database currently has five total tables.
     - imported from the official Wordle JSON
     - this includes the secret_words (in contrast to the official Wordle JSON that does not include the secret words in its valid words list)
 
+
+
+## Running the App
+The HTTPie commands listed in this section run under the assumption that the default localhost URI `127.0.0.1` is used and that the port value of `3000` in `.env` has not been changed. 
 
 ### User Authentication Routes
 #### Logging In
