@@ -51,21 +51,21 @@ $ foreman start
 
 ## Database Structure
 The app database currently has five total tables.
-- user
+- `user`
     - used for authentication
     - contains the `username` and `pwd` fields
-- games
+- `games`
     - the main game entry
     - a user can have as many games
     - apart from storing the `gameid` and `secretWord`, it also has the `isActive` and `hasWon` flags for tracking the state of the game.
     - `gameid` is the primary key, while `userid` is a foreign key
-- guesses
+- `guesses`
     - each game can have as many guesses (currently capped at **six** based on project requirements)
     - `gameid` is a foreign key
-- secret_words
+- `secret_words`
     - this is a lookup table for potential secret words
     - imported from the official Wordle JSON
-- valid_words
+- `valid_words`
     - this is a lookup table for valid words
     - imported from the official Wordle JSON
     - this includes the secret_words (in contrast to the official Wordle JSON that does not include the secret words in its valid words list)
