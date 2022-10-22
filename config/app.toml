@@ -1,0 +1,6 @@
+[DATABASES]
+URL = 'sqlite+aiosqlite:///wordle_app.db'
+
+[WORDLE]
+MAX_NUM_ATTEMPTS = 6
+WORDLE_LENGTH = 5

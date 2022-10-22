@@ -1,97 +1,88 @@
-# wordle-mock-backend
+# CPSC 449 - Project 1 - Wordle Mock Backend
 
-## Testing
+This is the main repository for the Wordle Mock Backend App. This README describes how to run the app and test the various access points.
 
+#### Authors
+Section 02
+Group 20
+Members: 
+- Divyansh Mohan Rao (divyanshrao@csu.fullerton.edu)
+- Ken Cue (kencue@csu.fullerton.edu)
+- Sam Le (hle406@csu.fullerton.edu)
+- Sam Truong (samtruonh@csu.fullerton.edu)
+
+
+## Setup
+### Requirements
+- Python 3 (with pip)
+- Quart
+- SQLite 3
+- Databases
+- SQLAlchemy (==v1.4.41) *see [Known Issues](#known-issues) section*
+- Foreman
+- Quart-Schema
+- HTTPie
+- PyTest
+
+Run the following commands if any of the required libraries are missing:
 ```
-pytest test_api.py
+$ sudo snap install httpie
+$ sudo apt update
+$ sudo apt install --yes python3-pip ruby-foreman sqlite3
+
+$ python3 -m pip install --upgrade quart[dotenv] click markupsafe Jinja2
+$ python3 -m pip install sqlalchemy==1.4.41
+$ python3 -m pip install databases[aiosqlite]
+$ python3 -m pip install quart-schema
 ```
 
-## How to launch app
+### Initializing the Database
+Before running the app, run the following command to initialize the database and populate the tables for the correct and valid words.
+```
+$ ./init.sh
+```
 
+### Launching the App
+Use the following command to start the app. Take note of the URI of the app in the output.
 ```
 $ foreman start
 ```
 
-## Login using httpie
 
+## Running the App
+The HTTPie commands listed in this section run under the assumption that the default localhost URI `127.0.0.1` is used and that the port value of `3000` in `.env` has not been changed. 
+
+### User Authentication Routes
+##### Logging In
 ```
-http POST <insert local url here>/login --auth <username>:<password>
+http POST http://127.0.0.1:3000/login --auth <username>:<password>
 ```
 
-## Register using httpie
-
+##### Register using httpie
 ```
 http POST <insert local url here>/register username=<new username> password=<new password>
 ```
 
-## Start a game using httpie
-
+#### Start a game using httpie
 ```
 http  <insert local url here>/startgame username=<new username>
 ```
 
-## list all the games using httpie
-
+#### list all the games using httpie
 ```
 http  <insert local url here>/listAllGames/<string:username>
 ```
 
-## retrive a games using httpie
-
+#### retrive a games using httpie
 ```
 http  <insert local url here>/retrievegame/<int:gameid>
 ```
 
-## databases implementation
-
-
-The database is implemented via. the Databases library. The database has to be initiated in an async function using databases library.
-
-In the databasesSnippets.py are examples of how to execute SQL calls through the databases library.
-
-Tables are already initialized in the init function and it can be copied into the app.py to be used.
-
-To execute one single insert SQL query through the databases library: 
-
-
+## Testing
 ```
-query = """INSERT INTO user (uID, userName, password, currentGameID) 
-                                VALUES (:uID, :userName, :password, :currentGameID)"""
-values = {"uID": 123, 
-            "userName": "jasmineTea", 
-            "password" : "attaDBS123", 
-            "currentGameID": 7}
-await database.execute(query=query, values=values)
+pytest test_api.py
 ```
 
-To execute many insert SQL queries through the databases library:
+## Known Issues
 
-
-```
-query = """INSERT INTO guessesMade (gameID, guess) 
-                                VALUES (:gameID, :guess)"""
-values = [
-    {"gameID": "123", "guess": "flower"},
-    {"gameID": "123", "guess": "cupcake"}]
-await database.execute_many(query=query, values=values)
-```
-
-You can query SQL statements too:
-
-# Fetch multiple rows
-
-```
-query = "SELECT * FROM notes WHERE completed = :completed"
-rows = await database.fetch_all(query=query, values={"completed": True})
-```
-
-# Fetch single row
-
-```
-query = "SELECT * FROM notes WHERE id = :id"
-result = await database.fetch_one(query=query, values={"id": 1})
-```
-
-Summary source: https://www.encode.io/databases/database_queries/ 
-
-
+- There seems to be an issue with SQLAlchemy v1.4.42 that breaks Databases. Downgrading to v1.4.41 seems to remove this issue as mentioned in [this StackOverflow entry](https://stackoverflow.com/questions/74089620/python-databases-library-cant-fetch-all-from-mysql-database).
