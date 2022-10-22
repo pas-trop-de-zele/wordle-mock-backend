@@ -75,24 +75,16 @@ async def populate_tables():
     query = """
             INSERT INTO secret_word (word) VALUES (:word)
             """
-    values = []
-    data = json.load(correct_json)
-    for word in data:
-        values.append({"word": word})
-    await database.execute_many(query=query, values=values)
+    correct_words = [{"word": word} for word in json.load(correct_json)]
+    await database.execute_many(query=query, values=correct_words)
 
     print("Populating valid_words table...")
     query = """
             INSERT INTO valid_words (word) VALUES (:word)
             """
-    values = []
-    data = json.load(valid_json)
-    for word in data:
-        values.append({"word": word})
-    data = json.load(correct_json)  # correct words are not in the valid words list, going to mix them in too.
-    for word in data:
-        values.append({"word": word})
-    await database.execute_many(query=query, values=values)
+    valid_words = [{"word": word} for word in json.load(valid_json)]
+    await database.execute_many(query=query, values=valid_words)
+    await database.execute_many(query=query, values=correct_words)
 
 
 
