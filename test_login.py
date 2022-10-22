@@ -9,7 +9,7 @@ async def test_get_login() -> None:
     response = await test_client.get("/login")
     data = await response.get_json()
     assert response.status_code == 200
-    assert data == {"message": "Send based64(username:password) in Authorization header"}
+    assert data == {"message": "Send as POST with based64(username:password) in Authorization header"}
 
 @pytest.mark.asyncio
 async def test_post_login_success() -> None:
