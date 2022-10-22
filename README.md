@@ -37,21 +37,16 @@ $ foreman start
 ```
 
 
-
-## Testing
-
-```
-pytest test_api.py
-```
-
 ## Running the App
+The HTTPie commands listed in this section run under the assumption that the default localhost URI `127.0.0.1` is used and that the port value of `3000` in `.env` has not been changed. 
 
-#### Login using httpie
+### User Authentication Routes
+##### Logging In
 ```
-http POST <insert local url here>/login --auth <username>:<password>
+http POST http://127.0.0.1:3000/login --auth <username>:<password>
 ```
 
-#### Register using httpie
+##### Register using httpie
 ```
 http POST <insert local url here>/register username=<new username> password=<new password>
 ```
@@ -71,7 +66,10 @@ http  <insert local url here>/listAllGames/<string:username>
 http  <insert local url here>/retrievegame/<int:gameid>
 ```
 
-
+## Testing
+```
+pytest test_api.py
+```
 
 ## Known Issues
 

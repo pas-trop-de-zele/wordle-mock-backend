@@ -24,7 +24,7 @@ async def init_db():
 
     query = """
             CREATE TABLE user (
-                userid INTEGER NOT NULL PRIMARY KEY ASC, 
+                userid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
                 username TEXT NOT NULL UNIQUE, 
                 pwd BLOB NOT NULL
             )
@@ -33,7 +33,7 @@ async def init_db():
 
     query = """ 
             CREATE TABLE games (
-                gameid INTEGER NOT NULL PRIMARY KEY ASC,
+                gameid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 userid INTEGER NOT NULL,
                 secretWord TEXT NOT NULL,
                 isActive INTEGER DEFAULT 1 NOT NULL,
@@ -44,7 +44,7 @@ async def init_db():
 
     query = """
             CREATE TABLE guesses (
-                guessid INTEGER NOT NULL PRIMARY KEY ASC,
+                guessid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 gameid INTEGER NOT NULL,
                 guess TEXT NOT NULL
             )
