@@ -6,7 +6,7 @@
     - Quart
     - SQLite 3
     - Databases
-    - SQLAlchemy (==v1.4.41) __see Known Issues__
+    - SQLAlchemy (==v1.4.41) *see Known Issues section*
     - Foreman
     - Quart-Schema
     - HTTPie
@@ -19,6 +19,7 @@ $ sudo apt update
 $ sudo apt install --yes python3-pip ruby-foreman sqlite3
 
 $ python3 -m pip install --upgrade quart[dotenv] click markupsafe Jinja2
+$ python3 -m pip install sqlalchemy==1.4.41
 $ python3 -m pip install databases[aiosqlite]
 $ python3 -m pip install quart-schema
 ```
