@@ -7,8 +7,10 @@ import base64
 
 from typing import Tuple
 from quart import Quart, jsonify, g, request, abort
+from quart_schema import QuartSchema
 
-app = Quart(__name__)  
+app = Quart(__name__)
+QuartSchema(app)
 
 app.config.from_file(f"./config/{__name__}.toml", toml.load)
 
