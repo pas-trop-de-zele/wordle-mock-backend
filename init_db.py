@@ -36,7 +36,7 @@ async def init_db():
                 gameid INTEGER NOT NULL PRIMARY KEY ASC,
                 userid INTEGER NOT NULL,
                 secretWord TEXT NOT NULL,
-                isActive INTEGER DEFAULT 0 NOT NULL,
+                isActive INTEGER DEFAULT 1 NOT NULL,
                 hasWon INTEGER DEFAULT 0 NOT NULL
             )
             """

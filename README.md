@@ -5,6 +5,8 @@
     - Python 3 (with pip)
     - Quart
     - SQLite 3
+    - Databases
+    - SQLAlchemy (==v1.4.41) __see Known Issues__
     - Foreman
     - Quart-Schema
     - HTTPie
@@ -70,3 +72,6 @@ http  <insert local url here>/retrievegame/<int:gameid>
 
 
 
+## Known Issues
+
+- There seems to be an issue with SQLAlchemy v1.4.42 that breaks Databases. Downgrading to v1.4.41 seems to remove this issue as mentioned in [this StackOverflow entry](https://stackoverflow.com/questions/74089620/python-databases-library-cant-fetch-all-from-mysql-database).
