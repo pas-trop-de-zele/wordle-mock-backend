@@ -59,25 +59,25 @@ async def register():
         return jsonify_message("Pass in username and password in POST request")
     else:
         data = await request.get_json()
+        db =  await _get_db()
+
         if not data or 'username' not in data or 'password' not in data:
             return jsonify_message("Required username and password"), 400
-        is_user = await is_user_exists(data['username'])
+        is_user = await is_user_exists(db, data['username'])
         if is_user :
             return jsonify_message("Username not availabe"), 400
 
-        await insert_user(data["username"], data["password"])
+        await insert_user(db, data["username"], data["password"])
         return jsonify_message("User registered")
 
 
-async def is_user_exists(username) -> bool:
-    db =  await _get_db()
+async def is_user_exists(db, username) -> bool:
     query = "SELECT username FROM user WHERE username = :username"
     user = await db.fetch_all(query=query, values={"username": username})
     return True if user and len(user) > 0 else False
 
 
-async def insert_user(username, password) -> None:
-    db = await _get_db()
+async def insert_user(db, username, password) -> None:
     query = "INSERT INTO user(username, pwd) VALUES(:username, :pwd)"
     values = {"username": username, "pwd": password}
     await db.execute(query=query, values=values)
