@@ -22,12 +22,6 @@ class Guess:
 
 
 @dataclasses.dataclass
-class RegistrationFields:
-    username: str
-    password: str
-
-
-@dataclasses.dataclass
 class Username:
     username: str
 
@@ -55,6 +49,12 @@ async def close_connection(exception):
 
 @app.route("/", methods=["GET"])
 async def home():
+    """
+    Home
+    
+    This is just the welcome message
+    """
+    
     return jsonify_message("Welcome to wordle!")
 
 
@@ -73,8 +73,7 @@ async def login():
 
 
 @app.route("/register", methods=["GET", "POST"])
-@validate_request(RegistrationFields)
-async def register(data: RegistrationFields):
+async def register():
     if request.method == "GET":
         return jsonify_message("Pass in username and password in POST request")
     else:
