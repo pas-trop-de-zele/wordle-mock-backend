@@ -4,15 +4,32 @@ import toml
 import sqlite3
 import databases
 import base64
+import dataclasses
 
 from typing import Tuple
 from quart import Quart, jsonify, g, request, abort
-from quart_schema import QuartSchema
+from quart_schema import QuartSchema, validate_request
 
 app = Quart(__name__)
 QuartSchema(app)
 
 app.config.from_file(f"./config/{__name__}.toml", toml.load)
+
+
+@dataclasses.dataclass
+class Guess:
+    guess: str
+
+
+@dataclasses.dataclass
+class RegistrationFields:
+    username: str
+    password: str
+
+
+@dataclasses.dataclass
+class Username:
+    username: str
 
 
 async def _connect_db():
@@ -56,7 +73,8 @@ async def login():
 
 
 @app.route("/register", methods=["GET", "POST"])
-async def register():
+@validate_request(RegistrationFields)
+async def register(data: RegistrationFields):
     if request.method == "GET":
         return jsonify_message("Pass in username and password in POST request")
     else:
@@ -94,7 +112,8 @@ def get_username_password_from_header(req) -> Tuple[str, str]:
 
 
 @app.route("/wordle/start", methods=["POST"])
-async def start_game():
+@validate_request(Username)
+async def start_game(data: Username):
     data = await request.get_json()
 
     if not data or 'username' not in data:
@@ -138,8 +157,7 @@ async def list_active_games(username):
         abort(404)
 
 
-async def is_active_game(username, gameid) -> bool:
-    db =  await _get_db()
+async def is_active_game(db, username, gameid) -> bool:
     query = """
             SELECT *
             FROM games
@@ -155,8 +173,9 @@ async def is_active_game(username, gameid) -> bool:
 
 @app.route("/wordle/<string:username>/<int:gameid>/status", methods=["GET"])
 async def retrieve_game(username, gameid):
-    if is_active_game(username, gameid):
-        db =  await _get_db()
+    db =  await _get_db()
+
+    if await is_active_game(db, username, gameid):
         query = """
                 SELECT guess, secretWord as secret_word
                 FROM guesses
@@ -190,11 +209,12 @@ def calculate_game_status(guesses):
 
 
 @app.route("/wordle/<string:username>/<int:gameid>/guess", methods=["POST"])
-async def make_guess(username, gameid):
-    if is_active_game(username, gameid):
-        data = await request.get_json()
-        db =  await _get_db()
+@validate_request(Guess)
+async def make_guess(username, gameid, data: Guess):
+    data = await request.get_json()
+    db =  await _get_db()
 
+    if await is_active_game(db, username, gameid):
         # validate the guessed word first
         if len(data["guess"]) != app.config["WORDLE"]["WORDLE_LENGTH"]:
             return jsonify_message(f"Not a valid guess! Please only guess {app.config['WORDLE']['WORDLE_LENGTH']}-letter words. This attempt does not count.")
