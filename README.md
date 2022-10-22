@@ -49,7 +49,7 @@ $ foreman start
 ```
 
 
-### Database Structure
+## Database Structure
 The app database currently has five total tables.
 - user
     - used for authentication
