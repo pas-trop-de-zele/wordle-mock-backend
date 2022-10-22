@@ -145,31 +145,74 @@ async def list_active_games(username):
         abort(404)
 
 
-@app.route("/wordle/<string:username>/<int:gameid>/status", methods=["GET"])
-async def retrieve_game(username, gameid):
+async def is_active_game(username, gameid) -> bool:
     db =  await _get_db()
     query = """
-            SELECT guess, secretWord as secret_word
-            FROM guesses
-            LEFT JOIN games ON guesses.gameid = games.gameid
+            SELECT *
+            FROM games
             LEFT JOIN user ON games.userid = user.userid
             WHERE username = :username AND games.gameid = :gameid AND isActive = 1
             """
-    guesses = await db.fetch_all(query=query, values={"username": username, "gameid": gameid})
-    num_guesses = len(guesses)
-    list_guesses = []
-    for guess in guesses:
-        correct_letters, correct_indices = compare_guess(guess.guess, guess.secret_word)
-        list_guesses.append({
-            "guess": guess.guess,
-            "correct_letters": correct_letters,
-            "correct_indices": correct_indices
-        })
-    if guesses:
-        return {
-            "num_guesses": num_guesses,
-            "guesses": list_guesses
-        }
+    game = await db.fetch_one(query=query, values={"username": username, "gameid": gameid})
+    if game:
+        return True
+    else:
+        return False
+        
+
+@app.route("/wordle/<string:username>/<int:gameid>/status", methods=["GET"])
+async def retrieve_game(username, gameid):
+    if is_active_game(username, gameid):
+        db =  await _get_db()
+        query = """
+                SELECT guess, secretWord as secret_word
+                FROM guesses
+                LEFT JOIN games ON guesses.gameid = games.gameid
+                WHERE games.gameid = :gameid AND isActive = 1
+                """
+        guesses = await db.fetch_all(query=query, values={"gameid": gameid})
+        num_guesses = len(guesses)
+        list_guesses = []
+        for guess in guesses:
+            correct_letters, correct_indices = compare_guess(guess.guess, guess.secret_word)
+            list_guesses.append({
+                "guess": guess.guess,
+                "correct_letters": correct_letters,
+                "correct_indices": correct_indices
+            })
+        if guesses:
+            return {
+                "num_guesses": num_guesses,
+                "guesses": list_guesses
+            }
+    else:
+        abort(404)
+
+
+@app.route("/wordle/<string:username>/<int:gameid>/guess", methods=["POST"])
+async def make_guess(username, gameid):
+    if is_active_game(username, gameid):
+        db =  await _get_db()
+        query = """
+                INSERT INTO user(username, pwd) VALUES(:username, :pwd)
+                """
+        guesses = await db.fetch_all(query=query, values={"username": username, "gameid": gameid})
+        num_guesses = len(guesses)
+        list_guesses = []
+        for guess in guesses:
+            correct_letters, correct_indices = compare_guess(guess.guess, guess.secret_word)
+            list_guesses.append({
+                "guess": guess.guess,
+                "correct_letters": correct_letters,
+                "correct_indices": correct_indices
+            })
+        if guesses:
+            return {
+                "num_guesses": num_guesses,
+                "guesses": list_guesses
+            }
+        
+        data = await request.geto_json()
     else:
         abort(404)
 
