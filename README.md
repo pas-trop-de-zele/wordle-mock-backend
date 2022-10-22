@@ -1,4 +1,16 @@
-# wordle-mock-backend
+# CPSC 449 - Project 1 - Wordle Mock Backend
+
+This is the main repository for the Wordle Mock Backend App. This README describes how to run the app and test the various access points.
+
+#### Authors
+Section 02
+Group 20
+Members: 
+- Divyansh Mohan Rao (divyanshrao@csu.fullerton.edu)
+- Ken Cue (kencue@csu.fullerton.edu)
+- Sam Le (hle406@csu.fullerton.edu)
+- Sam Truong (samtruonh@csu.fullerton.edu)
+
 
 ## Setup
 ### Requirements
@@ -6,7 +18,7 @@
 - Quart
 - SQLite 3
 - Databases
-- SQLAlchemy (==v1.4.41) *see Known Issues section*
+- SQLAlchemy (==v1.4.41) *see [Known Issues](#known-issues) section*
 - Foreman
 - Quart-Schema
 - HTTPie
