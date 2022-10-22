@@ -2,7 +2,7 @@
 
 This is the main repository for the Wordle Mock Backend App. This README describes how to run the app and test the various access points.
 
-#### Authors
+### Authors
 Section 02
 Group 20
 Members: 
@@ -48,40 +48,46 @@ Use the following command to start the app. Take note of the URI of the app in t
 $ foreman start
 ```
 
-
 ## Running the App
 The HTTPie commands listed in this section run under the assumption that the default localhost URI `127.0.0.1` is used and that the port value of `3000` in `.env` has not been changed. 
 
+
 ### User Authentication Routes
-##### Logging In
+#### Logging In
 ```
 http POST http://127.0.0.1:3000/login --auth <username>:<password>
 ```
+Using a `GET` request will display a message asking to use `POST`. It will return a `401` error if incorrectly guessed, and will return `{"authenticated": True}` if properly authenticated.
 
-##### Register using httpie
+#### Registering a new user
 ```
-http POST <insert local url here>/register username=<new username> password=<new password>
+http POST http://127.0.0.1:3000/register username=<new username> password=<new password>
 ```
+Using a `GET` request will display a message asking to use `POST`. It will also give a `400` error when the username already exists.
 
-#### Start a game using httpie
+### Wordle Game Routes
+#### Starting a game
 ```
-http  <insert local url here>/startgame username=<new username>
+http GET http://127.0.0.1:3000/wordle/start username=<username>
 ```
+This will only
 
 #### list all the games using httpie
 ```
-http  <insert local url here>/listAllGames/<string:username>
+http  http://127.0.0.1:3000/listAllGames/<string:username>
 ```
 
 #### retrive a games using httpie
 ```
-http  <insert local url here>/retrievegame/<int:gameid>
+http  http://127.0.0.1:3000/retrievegame/<int:gameid>
 ```
+
 
 ## Testing
 ```
 pytest test_api.py
 ```
+
 
 ## Known Issues
 

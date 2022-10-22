@@ -97,7 +97,7 @@ async def populate_tables():
 
 
 def main():
-    # asyncio.run(init_db()) 
+    asyncio.run(init_db()) 
     asyncio.run(populate_tables())
 
 if __name__ == "__main__":

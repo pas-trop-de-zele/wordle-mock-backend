@@ -42,7 +42,7 @@ async def home():
 @app.route("/login", methods=["GET", "POST"])
 async def login():
     if request.method == "GET":
-        return jsonify_message("Send based64(username:password) in Authorization header")
+        return jsonify_message("Send as POST with based64(username:password) in Authorization header")
     else:
         username, password = get_username_password_from_header(request)
         db = await _get_db()
