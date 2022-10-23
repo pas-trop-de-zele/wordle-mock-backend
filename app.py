@@ -267,11 +267,15 @@ async def make_guess(username, gameid, data: Guess):
                 return jsonify_message(f"{data['guess']} is not a valid word! Try again. This attempt does not count.")
 
         # guess was valid, proceed to store and check game state
-        query = """
-                INSERT INTO guesses(gameid, guess) VALUES(:gameid, :guess)
-                """
-        await db.execute(query=query, values={"gameid": gameid, "guess": data["guess"]})
-
+        try:
+            query = """
+                    INSERT INTO guesses(gameid, guess) VALUES(:gameid, :guess)
+                    """
+            await db.execute(query=query, values={"gameid": gameid, "guess": data["guess"]})
+        except sqlite3.IntegrityError as e:
+            # guesses are unique per game
+            abort(409, e)
+        
         # grab the secret word
         query = """
                 SELECT secretWord AS secret_word FROM games WHERE gameid = :gameid
