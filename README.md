@@ -110,7 +110,7 @@ This lists all the game IDs of the active games of the user. Note that this only
 ```
 http GET http://127.0.0.1:3000/wordle/<username>/<gameid>/status
 ```
-This retrieves all the relevant information of a particular game. It provides a JSON string in the with the number guesses for the the current game along with all the previous guesses tied to that particular game. Each guess entry contains hints on which letters are in the secret word and in the correct spot or wrong spot.
+This retrieves all the relevant information of a particular **active** game. It provides a JSON string in the with the number guesses for the the current game along with all the previous guesses tied to that particular game. Each guess entry contains hints on which letters are in the secret word and in the correct spot or wrong spot.
 
 Return JSON is in the form of:
 ```

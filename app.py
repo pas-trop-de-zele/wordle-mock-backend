@@ -201,7 +201,7 @@ async def retrieve_game(username, gameid):
     """
     Retrieve Game
     
-    This displays the current state of a specified game. It lists all the attempts, as well as,
+    This displays the current state of a specified active game. It lists all the attempts, as well as,
     the details of how close the attempts are from the secret word. This also shows the number
     of attempts left before the game ends.
     """
