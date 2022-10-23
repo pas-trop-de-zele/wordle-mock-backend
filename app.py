@@ -179,7 +179,7 @@ async def list_active_games(username):
     if games:
         return list(map(dict, games))
     else:
-        abort(404)
+        return jsonify_message(f"No active games found for user, {username}."), 404
 
 
 async def is_active_game(db, username, gameid) -> bool:
