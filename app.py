@@ -262,7 +262,7 @@ async def make_guess(username, gameid, data: Guess):
         else:
             query = "SELECT * FROM valid_words WHERE word = :guess"
             is_valid = await db.fetch_one(query=query, values={"guess": data["guess"]})
-            print(is_valid)
+
             if not is_valid:
                 return jsonify_message(f"{data['guess']} is not a valid word! Try again. This attempt does not count.")
 
