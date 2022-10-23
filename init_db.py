@@ -46,7 +46,8 @@ async def init_db():
             CREATE TABLE guesses (
                 guessid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 gameid INTEGER NOT NULL,
-                guess TEXT NOT NULL
+                guess TEXT NOT NULL,
+                UNIQUE(gameid, guess)
             )
             """
     await database.execute(query=query)

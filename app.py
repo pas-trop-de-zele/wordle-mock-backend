@@ -4,13 +4,26 @@ import toml
 import sqlite3
 import databases
 import base64
+import dataclasses
 
-from typing import Tuple
+from typing import Tuple, Optional
 from quart import Quart, jsonify, g, request, abort
+from quart_schema import QuartSchema, validate_request
 
-app = Quart(__name__)  
+app = Quart(__name__)
+QuartSchema(app)
 
 app.config.from_file(f"./config/{__name__}.toml", toml.load)
+
+
+@dataclasses.dataclass
+class Guess:
+    guess: str
+
+
+@dataclasses.dataclass
+class Username:
+    username: str
 
 
 async def _connect_db():
@@ -36,11 +49,23 @@ async def close_connection(exception):
 
 @app.route("/", methods=["GET"])
 async def home():
+    """
+    Home
+    
+    This is just the welcome message.
+    """
+    
     return jsonify_message("Welcome to wordle!")
 
 
 @app.route("/login", methods=["GET", "POST"])
 async def login():
+    """
+    Login
+    
+    Authenticate user from username & password pass through the header.
+    """
+
     if request.method == "GET":
         return jsonify_message("Send as POST with based64(username:password) in Authorization header")
     else:
@@ -55,6 +80,13 @@ async def login():
 
 @app.route("/register", methods=["GET", "POST"])
 async def register():
+    """
+    Register
+    
+    Register a user. 
+    Note: Use HTTPie to test this route (not /docs or /redocs). See README.md for more info.
+    """
+
     if request.method == "GET":
         return jsonify_message("Pass in username and password in POST request")
     else:
@@ -91,39 +123,50 @@ def get_username_password_from_header(req) -> Tuple[str, str]:
     return username, passsword
 
 
-@app.route("/wordle/start", methods=["GET", "POST"])
-async def start_game():
-    if request.method == "GET":
-        return jsonify_message("Pass in username to start the game")
+@app.route("/wordle/start", methods=["POST"])
+@validate_request(Username)
+async def start_game(data: Username):
+    """
+    Start Game
+    
+    Initializes a game. Returns the game ID if successful.
+    """
+
+    data = await request.get_json()
+
+    if not data or 'username' not in data:
+        return jsonify_message("Required username"), 400
+
+    db =  await _get_db()
+    query = "SELECT userid FROM user WHERE username = :username"
+    user = await db.fetch_one(query=query, values={"username": data['username']})
+    userid = 0
+    if not user:
+        return jsonify_message(f"Username not Found, Please register {data['username']}"), 404
     else:
-        data = await request.get_json()
+        userid = user["userid"]
 
-        if not data or 'username' not in data:
-            return jsonify_message("Required username"), 400
+    query = "SELECT * FROM secret_word ORDER BY RANDOM() LIMIT 1"
+    secret_word = await db.fetch_one(query=query)
 
-        db =  await _get_db()
-        query = "SELECT userid FROM user WHERE username = :username"
-        user = await db.fetch_one(query=query, values={"username": data['username']})
-        userid = 0
-        if not user:
-            return jsonify_message("Username not Found, Please register " + data['username']), 404
-        else:
-            userid = user["userid"]
-
-        query = "SELECT * FROM secret_word ORDER BY RANDOM() LIMIT 1"
-        secret_word = await db.fetch_one(query=query)
-
-        try:
-            query = "INSERT INTO games(userid, secretWord) VALUES(:userid, :secret_word)"
-            values = {"userid": userid, "secret_word": secret_word.word}
-            last_insert_id = await db.execute(query=query, values=values)
-        except sqlite3.IntegrityError as e:
-            abort(409, e)
-        return jsonify_message(f"game started with id: {last_insert_id}")
+    try:
+        query = "INSERT INTO games(userid, secretWord) VALUES(:userid, :secret_word)"
+        values = {"userid": userid, "secret_word": secret_word.word}
+        last_insert_id = await db.execute(query=query, values=values)
+    except sqlite3.IntegrityError as e:
+        abort(409, e)
+    return jsonify_message(f"Game started with id: {last_insert_id}.")
 
 
 @app.route("/wordle/<string:username>/games", methods=["GET"])
 async def list_active_games(username):
+    """
+    List Active Games
+    
+    This generates a list of game IDs that are active. Games that ran out of attempts 
+    or games that have been won are not included in the list.
+    """
+
     db =  await _get_db()
     query = """
             SELECT gameid 
@@ -136,11 +179,10 @@ async def list_active_games(username):
     if games:
         return list(map(dict, games))
     else:
-        abort(404)
+        return jsonify_message(f"No active games found for user, {username}."), 404
 
 
-async def is_active_game(username, gameid) -> bool:
-    db =  await _get_db()
+async def is_active_game(db, username, gameid) -> bool:
     query = """
             SELECT *
             FROM games
@@ -156,8 +198,17 @@ async def is_active_game(username, gameid) -> bool:
 
 @app.route("/wordle/<string:username>/<int:gameid>/status", methods=["GET"])
 async def retrieve_game(username, gameid):
-    if is_active_game(username, gameid):
-        db =  await _get_db()
+    """
+    Retrieve Game
+    
+    This displays the current state of a specified active game. It lists all the attempts, as well as,
+    the details of how close the attempts are from the secret word. This also shows the number
+    of attempts left before the game ends.
+    """
+
+    db =  await _get_db()
+
+    if await is_active_game(db, username, gameid):
         query = """
                 SELECT guess, secretWord as secret_word
                 FROM guesses
@@ -185,32 +236,46 @@ def calculate_game_status(guesses):
 
     return {
         "num_guesses": num_guesses,
+        "max_attempts": app.config["WORDLE"]["MAX_NUM_ATTEMPTS"],
         "guesses": list_guesses
     }
 
 
 @app.route("/wordle/<string:username>/<int:gameid>/guess", methods=["POST"])
-async def make_guess(username, gameid):
-    if is_active_game(username, gameid):
-        data = await request.get_json()
-        db =  await _get_db()
+@validate_request(Guess)
+async def make_guess(username, gameid, data: Guess):
+    """
+    Guess the Secret Word
+    
+    This inserts a guess into the guesses table if the guess word is a valid word. If the
+    guess is valid, it will show whether it is correct and display hints accordingly. It
+    will also tell the player how many attempts they have left.
+    """
 
+    data = await request.get_json()
+    db =  await _get_db()
+
+    if await is_active_game(db, username, gameid):
         # validate the guessed word first
         if len(data["guess"]) != app.config["WORDLE"]["WORDLE_LENGTH"]:
             return jsonify_message(f"Not a valid guess! Please only guess {app.config['WORDLE']['WORDLE_LENGTH']}-letter words. This attempt does not count.")
         else:
             query = "SELECT * FROM valid_words WHERE word = :guess"
             is_valid = await db.fetch_one(query=query, values={"guess": data["guess"]})
-            print(is_valid)
+
             if not is_valid:
                 return jsonify_message(f"{data['guess']} is not a valid word! Try again. This attempt does not count.")
 
         # guess was valid, proceed to store and check game state
-        query = """
-                INSERT INTO guesses(gameid, guess) VALUES(:gameid, :guess)
-                """
-        await db.execute(query=query, values={"gameid": gameid, "guess": data["guess"]})
-
+        try:
+            query = """
+                    INSERT INTO guesses(gameid, guess) VALUES(:gameid, :guess)
+                    """
+            await db.execute(query=query, values={"gameid": gameid, "guess": data["guess"]})
+        except sqlite3.IntegrityError as e:
+            # guesses are unique per game
+            abort(409, e)
+        
         # grab the secret word
         query = """
                 SELECT secretWord AS secret_word FROM games WHERE gameid = :gameid
