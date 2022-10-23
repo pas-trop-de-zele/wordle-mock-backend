@@ -4,7 +4,6 @@ INSERT INTO user VALUES(3,'user1','234dnjnd+4309!');
 INSERT INTO user VALUES(4,'user2','330+4!');
 INSERT INTO user VALUES(5,'user3','boo');
 INSERT INTO user VALUES(6,'user4','boo1234');
-COMMIT;
 
 INSERT INTO games VALUES(1,3,'canal',1,0);
 INSERT INTO games VALUES(2,3,'spoke',1,0);
@@ -43,7 +42,6 @@ INSERT INTO games VALUES(34,3,'stern',1,0);
 INSERT INTO games VALUES(35,3,'stork',1,0);
 INSERT INTO games VALUES(36,1,'swing',1,0);
 INSERT INTO games VALUES(37,1,'tunic',1,0);
-COMMIT;
 
 INSERT INTO guesses VALUES(1,1,'brine');
 INSERT INTO guesses VALUES(2,8,'trash');
@@ -59,4 +57,3 @@ INSERT INTO guesses VALUES(11,17,'women');
 INSERT INTO guesses VALUES(12,24,'ghost');
 INSERT INTO guesses VALUES(13,24,'money');
 INSERT INTO guesses VALUES(14,24,'women');
-COMMIT;

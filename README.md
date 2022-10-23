@@ -42,6 +42,11 @@ Before running the app, run the following command to initialize the database and
 $ ./init.sh
 ```
 
+Pass the `-d` option if you wish to populate the `user`, `games` and `guesses` tables with test data.
+```
+$ ./init.sh -d
+```
+
 ### Launching the App
 Use the following command to start the app. Take note of the URI of the app in the output.
 ```
