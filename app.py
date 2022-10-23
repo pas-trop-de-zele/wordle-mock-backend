@@ -6,7 +6,7 @@ import databases
 import base64
 import dataclasses
 
-from typing import Tuple
+from typing import Tuple, Optional
 from quart import Quart, jsonify, g, request, abort
 from quart_schema import QuartSchema, validate_request
 
@@ -52,7 +52,7 @@ async def home():
     """
     Home
     
-    This is just the welcome message
+    This is just the welcome message.
     """
     
     return jsonify_message("Welcome to wordle!")
@@ -60,6 +60,12 @@ async def home():
 
 @app.route("/login", methods=["GET", "POST"])
 async def login():
+    """
+    Login
+    
+    Authenticate user from username & password pass through the header.
+    """
+
     if request.method == "GET":
         return jsonify_message("Send as POST with based64(username:password) in Authorization header")
     else:
@@ -74,6 +80,13 @@ async def login():
 
 @app.route("/register", methods=["GET", "POST"])
 async def register():
+    """
+    Register
+    
+    Register a user. 
+    Note: Use HTTPie to test this route (not /docs or /redocs). See README.md for more info.
+    """
+
     if request.method == "GET":
         return jsonify_message("Pass in username and password in POST request")
     else:
@@ -113,6 +126,12 @@ def get_username_password_from_header(req) -> Tuple[str, str]:
 @app.route("/wordle/start", methods=["POST"])
 @validate_request(Username)
 async def start_game(data: Username):
+    """
+    Start Game
+    
+    Initializes a game. Returns the game ID if successful.
+    """
+
     data = await request.get_json()
 
     if not data or 'username' not in data:
@@ -141,6 +160,13 @@ async def start_game(data: Username):
 
 @app.route("/wordle/<string:username>/games", methods=["GET"])
 async def list_active_games(username):
+    """
+    List Active Games
+    
+    This generates a list of game IDs that are active. Games that ran out of attempts 
+    or games that have been won are not included in the list.
+    """
+
     db =  await _get_db()
     query = """
             SELECT gameid 
@@ -172,6 +198,14 @@ async def is_active_game(db, username, gameid) -> bool:
 
 @app.route("/wordle/<string:username>/<int:gameid>/status", methods=["GET"])
 async def retrieve_game(username, gameid):
+    """
+    Retrieve Game
+    
+    This displays the current state of a specified game. It lists all the attempts, as well as,
+    the details of how close the attempts are from the secret word. This also shows the number
+    of attempts left before the game ends.
+    """
+
     db =  await _get_db()
 
     if await is_active_game(db, username, gameid):
@@ -210,6 +244,14 @@ def calculate_game_status(guesses):
 @app.route("/wordle/<string:username>/<int:gameid>/guess", methods=["POST"])
 @validate_request(Guess)
 async def make_guess(username, gameid, data: Guess):
+    """
+    Guess the Secret Word
+    
+    This inserts a guess into the guesses table if the guess word is a valid word. If the
+    guess is valid, it will show whether it is correct and display hints accordingly. It
+    will also tell the player how many attempts they have left.
+    """
+
     data = await request.get_json()
     db =  await _get_db()
 
